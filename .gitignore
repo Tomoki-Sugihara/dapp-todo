@@ -12,8 +12,8 @@
 /.next/
 /out/
 
-# production
-/build
+# # production
+# /build
 
 # misc
 .DS_Store
@@ -35,3 +35,5 @@ yarn-error.log*
 
 # Optional eslint cache
 .eslintcache
+
+*.env*
