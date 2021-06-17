@@ -19,10 +19,10 @@ export const useTasks = () => {
 
   const fetchTasks = useCallback(async () => {
     if (!contract) return
-    const ids: string[] = await contract?.methods.getTaskIds().call()
-    console.log('ids', ids)
+    const taskIds: string[] = await contract?.methods.getTaskIds().call()
+    console.log('taskIds', taskIds)
     const newTasks = await Promise.all(
-      ids
+      taskIds
         .filter((e) => e !== '0')
         .map((id) => {
           const task: Promise<Task> = contract?.methods.getTask(id).call()
