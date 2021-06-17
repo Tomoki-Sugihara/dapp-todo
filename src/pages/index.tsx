@@ -44,7 +44,7 @@ const Home: VFC = () => {
 
   return (
     <Layout>
-      <div className="flex flex-col justify-center">
+      <div className="flex flex-col items-center">
         <TodoList>
           {tasks &&
             tasks.map((task: Task, index: number) => (
@@ -72,7 +72,7 @@ const Home: VFC = () => {
   )
 }
 
-const TodoList = styled.div`
+const TodoList = styled.ol`
   display: flex;
   flex-direction: column;
   margin: 20px;
@@ -81,7 +81,7 @@ const TodoList = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 300px;
+    width: 500px;
 
     > input {
       width: 20px;
