@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.9.0;
+pragma experimental ABIEncoderV2;
 
 contract TodoList {
   uint public taskCount = 0;
@@ -7,6 +8,7 @@ contract TodoList {
 
   struct Task {
     uint id;
+    address userAddress;
     string content;
     bool completed;
   }
@@ -30,7 +32,7 @@ contract TodoList {
 
   function createTask(string memory _content) public {
     taskCount ++;
-    tasks[taskCount] = Task(taskCount, _content, false);
+    tasks[taskCount] = Task(taskCount, msg.sender, _content, false);
     taskIds.push(taskCount);
     emit TaskCreated(taskCount, _content, false);
   }
@@ -43,17 +45,9 @@ contract TodoList {
     public
     view
     taskExists(id)
-    returns (
-      uint,
-      string memory,
-      bool
-    )
+    returns ( Task memory )
   {
-    return (
-      tasks[id].id,
-      tasks[id].content,
-      tasks[id].completed
-    );
+    return tasks[id];
   }
 
   function toggleCompleted(uint _id) public {
@@ -74,8 +68,15 @@ contract TodoList {
     }
   }
 
-  // function getTasks() public view returns (Task[] memory) {
-  //   return tasks;
+  // errorが出る
+  // function getAllTasks() public view returns (Task[] memory) {
+  //   Task[] memory result;
+  //   for (uint i = 0; i < taskIds.length; i++) {
+  //     if (taskIds[i] != 0) {
+  //       result[i] = tasks[i];
+  //     }
+  //   }
+  //   return result;
   // }
 
   modifier taskExists(uint256 id) {

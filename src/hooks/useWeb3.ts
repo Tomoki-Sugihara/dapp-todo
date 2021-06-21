@@ -18,7 +18,7 @@ export const useWeb3 = () => {
   const [account, setAccount] = useState('')
 
   const fetchWeb3 = useCallback(() => {
-    console.log(1, window?.web3)
+    // console.log(1, window?.web3)
     let web3
 
     // Modern dapp browser
@@ -37,7 +37,7 @@ export const useWeb3 = () => {
 
   const fetchContract = useCallback(async () => {
     if (!web3) return
-    console.log(2, window?.web3)
+    // console.log(2, window?.web3)
 
     const accounts = await web3.eth.getAccounts()
     const account = accounts[0]

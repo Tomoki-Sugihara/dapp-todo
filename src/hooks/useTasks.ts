@@ -2,16 +2,13 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { useWeb3 } from './useWeb3'
 
+export type Res = [string, string, string, boolean]
 export interface Task {
-  0: string
-  1: string
-  2: boolean
+  id: string
+  address: string
+  content: string
+  isCompleted: boolean
 }
-// export interface Task {
-//   id: string
-//   content: string
-//   completed: boolean
-// }
 
 export const useTasks = () => {
   const { contract } = useWeb3()
@@ -19,17 +16,18 @@ export const useTasks = () => {
 
   const fetchTasks = useCallback(async () => {
     if (!contract) return
-    const taskIds: string[] = await contract?.methods.getTaskIds().call()
-    console.log('taskIds', taskIds)
+
+    const taskIds: string[] = await contract.methods.getTaskIds().call()
+
     const newTasks = await Promise.all(
       taskIds
         .filter((e) => e !== '0')
-        .map((id) => {
-          const task: Promise<Task> = contract?.methods.getTask(id).call()
-          return task
+        .map(async (taskId) => {
+          const res: Res = await contract.methods.getTask(taskId).call()
+          const [id, address, content, isCompleted] = res
+          return { id, address, content, isCompleted }
         }),
     )
-    console.log('tasks', newTasks)
     setTasks(newTasks)
   }, [contract])
 

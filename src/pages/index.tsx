@@ -13,13 +13,13 @@ const Home: VFC = () => {
   const { tasks, fetchTasks } = useTasks()
 
   const handleChangeCheckbox = async (event: ChangeEvent<HTMLInputElement>, index: number) => {
-    const targetTaskId = tasks[index][0]
+    const targetTaskId = tasks[index].id
     await contract?.methods.toggleCompleted(targetTaskId).send({ from: account })
     await fetchTasks()
   }
 
   const handleClick = async (index: number) => {
-    const targetTaskId = tasks[index][0]
+    const targetTaskId = tasks[index].id
     await contract?.methods.deleteTask(targetTaskId).send({ from: account })
     await fetchTasks()
   }
@@ -49,16 +49,11 @@ const Home: VFC = () => {
           {tasks &&
             tasks.map((task: Task, index: number) => (
               // <li key={task[0]} className="grid grid-flow-row">
-              <li key={task[0]}>
-                <input type="checkbox" checked={task[2]} onChange={(e) => handleChangeCheckbox(e, index)} />
-                <p>{task[1]}</p>
+              <li key={task.id}>
+                <input type="checkbox" checked={task.isCompleted} onChange={(e) => handleChangeCheckbox(e, index)} />
+                <p>{task.content}</p>
                 <button onClick={() => handleClick(index)}>削除</button>
               </li>
-              // <div key={task.id}>
-              //   <div>{task.id}</div>
-              //   <div>{task.content}</div>
-              //   <div>{task.completed}</div>
-              // </div>
             ))}
         </TodoList>
         <form onSubmit={handleSubmit} className="m-6">
