@@ -2,14 +2,14 @@ import Link from 'next/link'
 import type { VFC } from 'react'
 
 const items = [
-  { href: '/', label: 'Home' },
-  { href: '/about', label: 'About' },
+  { href: '/', label: 'MyTask' },
+  { href: '/others', label: 'Others Task' },
 ]
 
 export const Header: VFC = () => {
   return (
     <header>
-      <h1>Title</h1>
+      <h1>Dapp Todo</h1>
       <nav>
         {items.map(({ href, label }) => {
           return (

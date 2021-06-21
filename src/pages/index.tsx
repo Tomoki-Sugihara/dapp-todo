@@ -10,16 +10,16 @@ import { useWeb3 } from '../hooks/useWeb3'
 const Home: VFC = () => {
   const [input, setInput] = useState('')
   const { contract, account } = useWeb3()
-  const { tasks, fetchTasks } = useTasks()
+  const { myTasks, fetchTasks } = useTasks()
 
   const handleChangeCheckbox = async (event: ChangeEvent<HTMLInputElement>, index: number) => {
-    const targetTaskId = tasks[index].id
+    const targetTaskId = myTasks[index].id
     await contract?.methods.toggleCompleted(targetTaskId).send({ from: account })
     await fetchTasks()
   }
 
   const handleClick = async (index: number) => {
-    const targetTaskId = tasks[index].id
+    const targetTaskId = myTasks[index].id
     await contract?.methods.deleteTask(targetTaskId).send({ from: account })
     await fetchTasks()
   }
@@ -46,8 +46,8 @@ const Home: VFC = () => {
     <Layout>
       <div className="flex flex-col items-center">
         <TodoList>
-          {tasks &&
-            tasks.map((task: Task, index: number) => (
+          {myTasks &&
+            myTasks.map((task: Task, index: number) => (
               // <li key={task[0]} className="grid grid-flow-row">
               <li key={task.id}>
                 <input type="checkbox" checked={task.isCompleted} onChange={(e) => handleChangeCheckbox(e, index)} />

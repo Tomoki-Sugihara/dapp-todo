@@ -11,8 +11,9 @@ export interface Task {
 }
 
 export const useTasks = () => {
-  const { contract } = useWeb3()
+  const { contract, account } = useWeb3()
   const [tasks, setTasks] = useState<Task[]>([])
+  const [myTasks, setMyTasks] = useState<Task[]>([])
 
   const fetchTasks = useCallback(async () => {
     if (!contract) return
@@ -28,8 +29,11 @@ export const useTasks = () => {
           return { id, address, content, isCompleted }
         }),
     )
+    const newMyTasks = newTasks.filter((task: Task) => task.address === account)
+
     setTasks(newTasks)
-  }, [contract])
+    setMyTasks(newMyTasks)
+  }, [contract, account])
 
   useEffect(() => {
     fetchTasks()
@@ -37,6 +41,7 @@ export const useTasks = () => {
 
   return {
     tasks,
+    myTasks,
     fetchTasks,
   }
 }
