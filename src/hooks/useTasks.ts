@@ -20,7 +20,7 @@ export const useTasks = () => {
   const fetchTasks = useCallback(async () => {
     if (!contract) return
     const taskIds: string[] = await contract?.methods.getTaskIds().call()
-    console.log('taskIds', taskIds)
+    // console.log('taskIds', taskIds)
     const newTasks = await Promise.all(
       taskIds
         .filter((e) => e !== '0')
@@ -29,7 +29,7 @@ export const useTasks = () => {
           return task
         }),
     )
-    console.log('tasks', newTasks)
+    // console.log('tasks', newTasks)
     setTasks(newTasks)
   }, [contract])
 

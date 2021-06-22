@@ -9,12 +9,15 @@ import { useWeb3 } from '../hooks/useWeb3'
 
 const Home: VFC = () => {
   const [input, setInput] = useState('')
-  const { contract, account } = useWeb3()
+  const { contract, account, toContract } = useWeb3()
   const { tasks, fetchTasks } = useTasks()
 
   const handleChangeCheckbox = async (event: ChangeEvent<HTMLInputElement>, index: number) => {
     const targetTaskId = tasks[index][0]
-    await contract?.methods.toggleCompleted(targetTaskId).send({ from: account })
+    const abi = await contract?.methods.toggleCompleted(targetTaskId).encodeABI()
+    await toContract(abi)
+    // await contract?.methods.toggleCompleted(targetTaskId).send({ from: account })
+    console.log('hoge')
     await fetchTasks()
   }
 

@@ -9,14 +9,14 @@ const items = [
 ]
 
 export const Header: VFC = () => {
-  const { user, redirect, logout } = useAuth()
+  const { user, signIn, signOut } = useAuth()
 
   const handleClick = () => {
-    user ? logout() : redirect()
+    user ? signOut() : signIn()
   }
   return (
     <header>
-      <h1>Title</h1>
+      <h1>Dapp Todo</h1>
       {user ? (
         <button onClick={handleClick}>ログアウト</button>
       ) : (

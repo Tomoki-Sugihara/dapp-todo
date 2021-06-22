@@ -93,7 +93,7 @@ module.exports = {
     private: {
       provider: new HDWalletProvider(
         process.env.MNEMONIC,
-        process.env.PRIVATE_CHAIN_URL, // change address to your private chain
+        process.env.NEXT_PUBLIC_PRIVATE_CHAIN_URL, // change address to your private chain
         0,
       ),
       network_id: '*',
