@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-
-import { useWeb3 } from './useWeb3'
+import { useLoading } from 'src/hooks/useLoading'
+import { useWeb3 } from 'src/hooks/useWeb3'
 
 export type Res = [string, string, string, boolean]
 export interface Task {
@@ -12,6 +12,7 @@ export interface Task {
 
 export const useTasks = () => {
   const { contract, account } = useWeb3()
+  const { isLoading, startLoading, stopLoading } = useLoading()
   const [tasks, setTasks] = useState<Task[]>([])
   const [myTasks, setMyTasks] = useState<Task[]>([])
 
@@ -35,6 +36,22 @@ export const useTasks = () => {
     setMyTasks(newMyTasks)
   }, [contract, account])
 
+  const writeTask = <T extends (...args: any[]) => Promise<void>>(callback: T) => {
+    const func = async (...args: Parameters<T>) => {
+      startLoading()
+      try {
+        await callback(...args)
+
+        await fetchTasks()
+      } catch (error) {
+        console.error(error)
+      } finally {
+        stopLoading()
+      }
+    }
+    return func
+  }
+
   useEffect(() => {
     fetchTasks()
   }, [fetchTasks])
@@ -43,5 +60,7 @@ export const useTasks = () => {
     tasks,
     myTasks,
     fetchTasks,
+    writeTask,
+    isLoading,
   }
 }

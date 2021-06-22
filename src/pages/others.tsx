@@ -10,34 +10,19 @@ const Home: VFC = () => {
   return (
     <Layout>
       <div className="flex flex-col items-center">
-        <div className="flex flex-col mt-5">
+        <TodoList>
           {myTasks &&
             myTasks.map((task: Task) => (
               // <li key={task[0]} className="grid grid-flow-row">
-              <li key={task.id} className="flex justify-between items-center">
-                <input className="w-5 h-5" type="checkbox" checked={task.isCompleted} readOnly />
-                <p className="text-xl font-bold">{task.content}</p>
+              <li key={task.id}>
+                <input type="checkbox" checked={task.isCompleted} readOnly />
+                <p>{task.content}</p>
                 <div />
               </li>
             ))}
-        </div>
+        </TodoList>
       </div>
     </Layout>
-    // <Layout>
-    //   <div className="flex flex-col items-center">
-    //     <TodoList>
-    //       {myTasks &&
-    //         myTasks.map((task: Task) => (
-    //           // <li key={task[0]} className="grid grid-flow-row">
-    //           <li key={task.id}>
-    //             <input type="checkbox" checked={task.isCompleted} readOnly />
-    //             <p>{task.content}</p>
-    //             <div />
-    //           </li>
-    //         ))}
-    //     </TodoList>
-    //   </div>
-    // </Layout>
   )
 }
 
