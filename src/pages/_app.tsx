@@ -2,14 +2,17 @@ import 'tailwindcss/tailwind.css'
 
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
+import { RecoilRoot } from 'recoil'
 
 const App = (props: AppProps) => {
   return (
     <>
       <Head>
-        <title>nexst</title>
+        <title>Dapp Todo</title>
       </Head>
-      <props.Component {...props.pageProps} />
+      <RecoilRoot>
+        <props.Component {...props.pageProps} />
+      </RecoilRoot>
     </>
   )
 }
