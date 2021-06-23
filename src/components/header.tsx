@@ -1,6 +1,9 @@
 import Link from 'next/link'
 import type { VFC } from 'react'
-import { useLoading } from 'src/hooks/useLoading'
+import { useRecoilValue } from 'recoil'
+import { loadingState } from 'src/state/config'
+
+import { useAuth } from '../hooks/useAuth'
 
 const items = [
   { href: '/', label: 'MyTask' },
@@ -8,11 +11,21 @@ const items = [
 ]
 
 export const Header: VFC = () => {
-  const { isLoading } = useLoading()
+  const { user, signIn, signOut } = useAuth()
+  const isLoading = useRecoilValue(loadingState)
+
+  const handleClick = () => {
+    user ? signOut() : signIn()
+  }
   return (
     <header>
       <h1>Dapp Todo</h1>
-      <div>
+      {user ? (
+        <button onClick={handleClick}>ログアウト</button>
+      ) : (
+        <button onClick={handleClick}>google ログイン</button>
+      )}
+      <div className="flex justify-between">
         <nav>
           {items.map(({ href, label }) => {
             return (
@@ -22,7 +35,7 @@ export const Header: VFC = () => {
             )
           })}
         </nav>
-        <div>{isLoading && 'ロード中'}</div>
+        <div>{isLoading && '更新中'}</div>
       </div>
     </header>
   )

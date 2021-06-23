@@ -28,15 +28,20 @@
     "trailingComma": "all"
   },
   "dependencies": {
+    "firebase": "^8.6.7",
+    "js-sha256": "^0.9.0",
     "next": "10.2.3",
     "react": "17.0.2",
     "react-dom": "17.0.2",
+    "recoil": "^0.3.1",
     "styled-components": "^5.3.0",
     "truffle": "^5.3.10"
   },
   "devDependencies": {
     "@testing-library/react": "11.2.7",
     "@truffle/hdwallet-provider": "^1.4.0",
+    "@types/ethereumjs-tx": "^2.0.0",
+    "@types/firebase": "^3.2.1",
     "@types/jest": "26.0.23",
     "@types/node": "15.6.1",
     "@types/react": "17.0.11",

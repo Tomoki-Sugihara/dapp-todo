@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useState } from 'react'
-import Web3 from 'web3'
-import type { Contract } from 'web3-eth-contract'
+import Common from 'ethereumjs-common'
+import { sha256 } from 'js-sha256'
+import { useCallback, useEffect } from 'react'
+import { useRecoilState } from 'recoil'
+import { accountState, contractState, web3State } from 'src/state/web3'
 
-// import artifacts from '../../build/contracts/Migrations.json'
 import artifacts from '../../build/contracts/TodoList.json'
 
 declare global {
@@ -13,45 +14,68 @@ declare global {
 }
 
 export const useWeb3 = () => {
-  const [web3, setWeb3] = useState<Web3>()
-  const [contract, setContract] = useState<Contract>()
-  const [account, setAccount] = useState('')
-
-  const fetchWeb3 = useCallback(() => {
-    // console.log(1, window?.web3)
-    let web3
-
-    // Modern dapp browser
-    if (window?.ethereum) {
-      web3 = new Web3(window.ethereum)
-      window.ethereum.enable().catch(console.error)
-    } else if (window?.web3) {
-      web3 = new Web3(window.web3.currentProvider)
-    } else {
-      const httpEndpoint = 'http://127.0.0.1:7545'
-      web3 = new Web3(new Web3.providers.HttpProvider(httpEndpoint))
-    }
-
-    setWeb3(web3)
-  }, [])
+  const [web3] = useRecoilState(web3State)
+  const [contract, setContract] = useRecoilState(contractState)
+  const [{ address, privateKey }, setAccount] = useRecoilState(accountState)
 
   const fetchContract = useCallback(async () => {
-    if (!web3) return
-    // console.log(2, window?.web3)
-
-    const accounts = await web3.eth.getAccounts()
-    const account = accounts[0]
-
+    if (!address) return
     const networkId = await web3.eth.net.getId()
     const contract = new web3.eth.Contract((artifacts as any).abi, (artifacts as any).networks[networkId].address)
-
-    setAccount(account)
     setContract(contract)
-  }, [web3])
+  }, [web3, address, setContract])
 
-  useEffect(() => {
-    fetchWeb3()
-  }, [fetchWeb3])
+  const createAccount = useCallback(
+    (uid: string) => {
+      const key = '0x' + sha256.hex(uid)
+      const account = web3.eth.accounts.privateKeyToAccount(key)
+      setAccount({ address: account.address, privateKey: key })
+    },
+    [web3.eth.accounts, setAccount],
+  )
+
+  const toContract = async (functionAbi: any) => {
+    if (!web3 || !contract) return
+    const EthereumTx = require('ethereumjs-tx').Transaction
+    const netId = await web3.eth.net.getId()
+    const details = {
+      nonce: 0,
+      gasPrice: 0,
+      gasLimit: 8000000,
+      from: address,
+      to: contract.options.address,
+      data: functionAbi,
+    }
+    const customCommon = Common.forCustomChain(
+      'mainnet',
+      {
+        name: 'privatechain',
+        networkId: netId,
+        chainId: netId,
+      },
+      'petersburg',
+    )
+
+    return new Promise<void>((resolve, reject) => {
+      web3.eth.getTransactionCount(address, async (err, nonce) => {
+        details.nonce = nonce
+        const transaction = await new EthereumTx(details, { common: customCommon })
+        transaction.sign(Buffer.from(privateKey.slice(2), 'hex'))
+        const rawdata = '0x' + transaction.serialize().toString('hex')
+        await web3.eth
+          .sendSignedTransaction(rawdata)
+          .on('transactionHash', (hash) => {
+            console.log(['transferToStaging Trx Hash:' + hash]) // eslint-disable-line no-console
+          })
+          .on('receipt', async (receipt) => {
+            resolve(console.log(['transferToStaging Receipt:', receipt])) // eslint-disable-line no-console
+          })
+          .on('error', (error) => {
+            reject(console.error(error))
+          })
+      })
+    })
+  }
 
   useEffect(() => {
     fetchContract()
@@ -59,7 +83,10 @@ export const useWeb3 = () => {
 
   return {
     web3,
-    account,
+    address,
     contract,
+    privateKey,
+    toContract,
+    createAccount,
   }
 }
