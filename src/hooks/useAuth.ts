@@ -1,45 +1,23 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect } from 'react'
+import { useRecoilState } from 'recoil'
 import { useWeb3 } from 'src/hooks/useWeb3'
+import { userState } from 'src/state/user'
 
 import firebase, { auth } from '../../utils/firebase'
-// import { auth, firebase } from '../../utils/firebase'
 
 export const useAuth = () => {
-  const [user, setUser] = useState<firebase.User>()
+  const [user, setUser] = useRecoilState(userState)
   const { createAccount } = useWeb3()
-
-  // const initializeUser = useCallback(() => {
-  //   const hoge = auth().onAuthStateChanged(async (newUser) => {
-  //     console.log(newUser)
-  //     if (newUser) {
-  //       setUser(newUser)
-  //       hoge()
-  //     }
-  //   })
-  // }, [])
 
   const initializeUser = useCallback(() => {
     const unsubscribe = auth().onAuthStateChanged((newUser) => {
-      console.log(newUser)
       if (newUser) {
         setUser(newUser)
         createAccount(newUser.uid)
       }
     })
     return () => unsubscribe()
-  }, [createAccount])
-
-  // }, [])
-  // const initializeUser = useCallback(() => {
-  //   const unsubscribe = auth().onAuthStateChanged((newUser) => {
-  //     // auth().onAuthStateChanged((user) => {
-  //     if (newUser) {
-  //       setUser(newUser)
-  //       console.log(user)
-  //     }
-  //   })
-  //   unsubscribe()
-  // }, [user])
+  }, [setUser, createAccount])
 
   useEffect(() => {
     return initializeUser()
@@ -51,7 +29,6 @@ export const useAuth = () => {
     auth()
       .signInWithPopup(googleProvider)
       .then((userCredential) => {
-        console.log('enter2')
         const user = userCredential.user
         if (user) {
           setUser(user)
@@ -59,22 +36,10 @@ export const useAuth = () => {
         }
       })
   }
-  // auth().signInWithRedirect(googleProvider)
-  //   auth()
-  //     .getRedirectResult()
-  //     .then((userCredential) => {
-  //       console.log('enter2')
-  //       const user = userCredential.user
-  //       if (user) {
-  //         setUser(user)
-  //         createAccount(user.uid)
-  //       }
-  //     })
-  // }
 
   const signOut = async () => {
     await auth().signOut()
-    setUser(undefined)
+    setUser(null)
   }
 
   return {

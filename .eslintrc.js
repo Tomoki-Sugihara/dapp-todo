@@ -53,7 +53,7 @@ module.exports = {
       'error',
       { selector: ['typeAlias', 'typeParameter'], format: ['PascalCase'] },
       { selector: ['property', 'parameterProperty', 'method'], format: ['camelCase'] },
-      { selector: 'variable', types: ['boolean'], format: ['PascalCase'], prefix: ['is', 'has', 'should'] },
+      { selector: 'variable', types: ['boolean'], format: ['PascalCase'], prefix: ['is', 'has', 'should', '_'] },
     ],
     'jsx-a11y/anchor-is-valid': [
       'error',

@@ -7,24 +7,23 @@ import { useWeb3 } from 'src/hooks/useWeb3'
 import styled from 'styled-components'
 
 const Home: VFC = () => {
-  const { contract, account, toContract } = useWeb3()
+  const { contract, toContract } = useWeb3()
   const { myTasks, writeTask } = useTasks()
-
   const [input, setInput] = useState('')
 
   const handleChangeCheckbox = writeTask(async (index: number) => {
     const targetTask = myTasks[index]
 
-    const abi = await contract?.methods.toggleCompleted(targetTask.id).encodeABI()
+    const abi = contract?.methods.toggleCompleted(targetTask.id).encodeABI()
     await toContract(abi)
-    await contract?.methods.toggleCompleted(targetTask.id).send({ from: account })
   })
 
   const handleClickDelete = writeTask(async (index: number) => {
     const targetTaskId = myTasks[index].id
     myTasks.filter((task: Task) => task.id !== targetTaskId)
 
-    await contract?.methods.deleteTask(targetTaskId).send({ from: account })
+    const abi = contract?.methods.deleteTask(targetTaskId).encodeABI()
+    await toContract(abi)
   })
 
   const handleSubmit = writeTask(async (e: FormEvent) => {
@@ -35,9 +34,9 @@ const Home: VFC = () => {
       return
     }
 
-    await contract?.methods.createTask(input).send({ from: account })
-
+    const abi = contract?.methods.createTask(input).encodeABI()
     setInput('')
+    await toContract(abi)
   })
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -50,7 +49,6 @@ const Home: VFC = () => {
         <TodoList>
           {myTasks &&
             myTasks.map((task: Task, index: number) => (
-              // <li key={task[0]} className="grid grid-flow-row">
               <li key={task.id}>
                 <input type="checkbox" checked={task.isCompleted} onChange={() => handleChangeCheckbox(index)} />
                 <p>{task.content}</p>

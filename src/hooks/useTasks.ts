@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useLoading } from 'src/hooks/useLoading'
+import { useRecoilState } from 'recoil'
 import { useWeb3 } from 'src/hooks/useWeb3'
+import { loadingState } from 'src/state/config'
 
 export type Res = [string, string, string, boolean]
 export interface Task {
@@ -11,15 +12,14 @@ export interface Task {
 }
 
 export const useTasks = () => {
-  const { contract, account } = useWeb3()
-  const { isLoading, startLoading, stopLoading } = useLoading()
+  const { contract, address } = useWeb3()
+  const [isLoading, setLoading] = useRecoilState(loadingState)
   const [tasks, setTasks] = useState<Task[]>([])
   const [myTasks, setMyTasks] = useState<Task[]>([])
 
   const fetchTasks = useCallback(async () => {
     if (!contract) return
     const taskIds: string[] = await contract?.methods.getTaskIds().call()
-    // console.log('taskIds', taskIds)
     const newTasks = await Promise.all(
       taskIds
         .filter((e) => e !== '0')
@@ -29,15 +29,15 @@ export const useTasks = () => {
           return { id, address, content, isCompleted }
         }),
     )
-    const newMyTasks = newTasks.filter((task: Task) => task.address === account)
+    const newMyTasks = newTasks.filter((task: Task) => task.address === address)
 
     setTasks(newTasks)
     setMyTasks(newMyTasks)
-  }, [contract, account])
+  }, [contract, address])
 
   const writeTask = <T extends (...args: any[]) => Promise<void>>(callback: T) => {
     const func = async (...args: Parameters<T>) => {
-      startLoading()
+      setLoading(true)
       try {
         await callback(...args)
 
@@ -45,7 +45,7 @@ export const useTasks = () => {
       } catch (error) {
         console.error(error)
       } finally {
-        stopLoading()
+        setLoading(false)
       }
     }
     return func
