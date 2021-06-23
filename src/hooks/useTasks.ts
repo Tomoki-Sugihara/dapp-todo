@@ -1,21 +1,20 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useLoading } from 'src/hooks/useLoading'
+import { useWeb3 } from 'src/hooks/useWeb3'
 
-import { useWeb3 } from './useWeb3'
-
+export type Res = [string, string, string, boolean]
 export interface Task {
-  0: string
-  1: string
-  2: boolean
+  id: string
+  address: string
+  content: string
+  isCompleted: boolean
 }
-// export interface Task {
-//   id: string
-//   content: string
-//   completed: boolean
-// }
 
 export const useTasks = () => {
-  const { contract } = useWeb3()
+  const { contract, account } = useWeb3()
+  const { isLoading, startLoading, stopLoading } = useLoading()
   const [tasks, setTasks] = useState<Task[]>([])
+  const [myTasks, setMyTasks] = useState<Task[]>([])
 
   const fetchTasks = useCallback(async () => {
     if (!contract) return
@@ -24,14 +23,33 @@ export const useTasks = () => {
     const newTasks = await Promise.all(
       taskIds
         .filter((e) => e !== '0')
-        .map((id) => {
-          const task: Promise<Task> = contract?.methods.getTask(id).call()
-          return task
+        .map(async (taskId) => {
+          const res: Res = await contract.methods.getTask(taskId).call()
+          const [id, address, content, isCompleted] = res
+          return { id, address, content, isCompleted }
         }),
     )
-    // console.log('tasks', newTasks)
+    const newMyTasks = newTasks.filter((task: Task) => task.address === account)
+
     setTasks(newTasks)
-  }, [contract])
+    setMyTasks(newMyTasks)
+  }, [contract, account])
+
+  const writeTask = <T extends (...args: any[]) => Promise<void>>(callback: T) => {
+    const func = async (...args: Parameters<T>) => {
+      startLoading()
+      try {
+        await callback(...args)
+
+        await fetchTasks()
+      } catch (error) {
+        console.error(error)
+      } finally {
+        stopLoading()
+      }
+    }
+    return func
+  }
 
   useEffect(() => {
     fetchTasks()
@@ -39,6 +57,9 @@ export const useTasks = () => {
 
   return {
     tasks,
+    myTasks,
     fetchTasks,
+    writeTask,
+    isLoading,
   }
 }

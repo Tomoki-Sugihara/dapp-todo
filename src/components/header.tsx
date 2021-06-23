@@ -1,11 +1,12 @@
 import Link from 'next/link'
 import type { VFC } from 'react'
+import { useLoading } from 'src/hooks/useLoading'
 
 import { useAuth } from '../hooks/useAuth'
 
 const items = [
-  { href: '/', label: 'Home' },
-  { href: '/about', label: 'About' },
+  { href: '/', label: 'MyTask' },
+  { href: '/others', label: 'Others Task' },
 ]
 
 export const Header: VFC = () => {

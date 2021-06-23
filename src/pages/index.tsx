@@ -3,35 +3,31 @@ import { useState } from 'react'
 import { Layout } from 'src/components/layout'
 import type { Task } from 'src/hooks/useTasks'
 import { useTasks } from 'src/hooks/useTasks'
+import { useWeb3 } from 'src/hooks/useWeb3'
 import styled from 'styled-components'
 
-import { useWeb3 } from '../hooks/useWeb3'
-
 const Home: VFC = () => {
-  const [input, setInput] = useState('')
   const { contract, account, toContract } = useWeb3()
-  const { tasks, fetchTasks } = useTasks()
+  const { myTasks, writeTask } = useTasks()
 
-  const handleChangeCheckbox = async (event: ChangeEvent<HTMLInputElement>, index: number) => {
-    const targetTaskId = tasks[index][0]
-    const abi = await contract?.methods.toggleCompleted(targetTaskId).encodeABI()
+  const [input, setInput] = useState('')
+
+  const handleChangeCheckbox = writeTask(async (index: number) => {
+    const targetTask = myTasks[index]
+
+    const abi = await contract?.methods.toggleCompleted(targetTask.id).encodeABI()
     await toContract(abi)
-    // await contract?.methods.toggleCompleted(targetTaskId).send({ from: account })
-    console.log('hoge')
-    await fetchTasks()
-  }
+    await contract?.methods.toggleCompleted(targetTask.id).send({ from: account })
+  })
 
-  const handleClick = async (index: number) => {
-    const targetTaskId = tasks[index][0]
+  const handleClickDelete = writeTask(async (index: number) => {
+    const targetTaskId = myTasks[index].id
+    myTasks.filter((task: Task) => task.id !== targetTaskId)
+
     await contract?.methods.deleteTask(targetTaskId).send({ from: account })
-    await fetchTasks()
-  }
+  })
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setInput(event.target.value)
-  }
-
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = writeTask(async (e: FormEvent) => {
     e.preventDefault()
 
     if (!input.trim()) {
@@ -40,28 +36,26 @@ const Home: VFC = () => {
     }
 
     await contract?.methods.createTask(input).send({ from: account })
-    await fetchTasks()
 
     setInput('')
+  })
+
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setInput(event.target.value)
   }
 
   return (
     <Layout>
       <div className="flex flex-col items-center">
         <TodoList>
-          {tasks &&
-            tasks.map((task: Task, index: number) => (
+          {myTasks &&
+            myTasks.map((task: Task, index: number) => (
               // <li key={task[0]} className="grid grid-flow-row">
-              <li key={task[0]}>
-                <input type="checkbox" checked={task[2]} onChange={(e) => handleChangeCheckbox(e, index)} />
-                <p>{task[1]}</p>
-                <button onClick={() => handleClick(index)}>削除</button>
+              <li key={task.id}>
+                <input type="checkbox" checked={task.isCompleted} onChange={() => handleChangeCheckbox(index)} />
+                <p>{task.content}</p>
+                <button onClick={() => handleClickDelete(index)}>削除</button>
               </li>
-              // <div key={task.id}>
-              //   <div>{task.id}</div>
-              //   <div>{task.content}</div>
-              //   <div>{task.completed}</div>
-              // </div>
             ))}
         </TodoList>
         <form onSubmit={handleSubmit} className="m-6">
