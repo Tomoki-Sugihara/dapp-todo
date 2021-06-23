@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useRecoilState } from 'recoil'
+import { useAuth } from 'src/hooks/useAuth'
 import { useWeb3 } from 'src/hooks/useWeb3'
 import { loadingState } from 'src/state/config'
 
@@ -14,6 +15,7 @@ export interface Task {
 export const useTasks = () => {
   const { contract, address } = useWeb3()
   const [isLoading, setLoading] = useRecoilState(loadingState)
+  const { user } = useAuth()
   const [tasks, setTasks] = useState<Task[]>([])
   const [myTasks, setMyTasks] = useState<Task[]>([])
 
@@ -37,6 +39,8 @@ export const useTasks = () => {
 
   const writeTask = <T extends (...args: any[]) => Promise<void>>(callback: T) => {
     const func = async (...args: Parameters<T>) => {
+      if (!user) return alert('ログインしてください')
+
       setLoading(true)
       try {
         await callback(...args)

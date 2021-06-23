@@ -26,7 +26,7 @@ export const useAuth = () => {
   const signIn = async () => {
     const googleProvider = new firebase.auth.GoogleAuthProvider()
 
-    auth()
+    await auth()
       .signInWithPopup(googleProvider)
       .then((userCredential) => {
         const user = userCredential.user
